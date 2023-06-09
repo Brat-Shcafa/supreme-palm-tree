@@ -3,22 +3,24 @@
 <%- include('particles/navigation.ejs') %>
 
 <% if (items.length>0) {%>
-    <% for (let i = 0; i < items.length; i++) { %>
+    <div id="content">
+        <% for (let i = 0; i < items.length; i++) { %>
 
-        <div class="section">
-            <a href="/items/<%= items[i].id %>">
-                <h2 class="section__title"><%= items[i].title %></h2>
-                <img class="section__image" src="img/<%= items[i].image %>">
-            </a>
-        
+            <div class="section">
+                <a href="/items/<%= items[i].id %>">
+                    <h2 class="section__title"><%= items[i].title %></h2>
+                    <img class="section__image" src="img/<%= items[i].image %>">
+                </a>
+            
 
-        <form action="/delete" method="post">
-                <input class="form-button" type="submit" value='Удалить'>
-                <input type="hidden" value="<%= items[i].id %>" name="id">
-        </form>
+            <form action="/delete" method="post">
+                    <input class="form-button" type="submit" value='Удалить'>
+                    <input type="hidden" value="<%= items[i].id %>" name="id">
+            </form>
 
-        </div>
-    <% } %>
+            </div>
+        <% } %>
+    </div>
     <div>
         <% if (curPage>1){ %>
             <a href="/?page=<%= curPage-1 %>">Назад</a>
@@ -28,5 +30,5 @@
         <% } %>
     </div>
 <% } %>
-
+<button id="fetch">Load items</button>
 <%- include('particles/footer.ejs') %>
