@@ -3,7 +3,7 @@
 <%- include('particles/navigation.ejs') %>
 
 <% if (items.length>0) {%>
-    <div id="content">
+    <div id="content" data-pages="<%= totPage %>">
         <% for (let i = 0; i < items.length; i++) { %>
 
             <div class="section">
@@ -30,5 +30,7 @@
         <% } %>
     </div>
 <% } %>
-<button id="fetch">Load items</button>
+<% if (curPage<totPage) {%>
+    <button id="fetch">Показать ещё</button>
+<% } %>
 <%- include('particles/footer.ejs') %>

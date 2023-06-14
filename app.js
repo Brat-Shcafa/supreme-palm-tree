@@ -19,6 +19,8 @@ connection.connect((err) => {
     }
 });
 
+app.use(express.json());
+
 // Путь к директории файлов ресурсов (css, js, images)
 app.use(express.static('public'));
 
@@ -79,8 +81,9 @@ function isAuth(req, res, next) {
     });
 })
 
-app.get('/items', (req, res) => {
-    connection.query('select * from items', (err, data, fields) => {
+app.post('/items', (req, res) => {
+    let offset = req.body.offset;
+    connection.query('select * from items limit 5 offset ?', [[offset]], (err, data, fields) => {
         if (err) {
             console.log(err);
         };
