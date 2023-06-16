@@ -81,6 +81,24 @@ function isAuth(req, res, next) {
     });
 })
 
+app.get('/categories', (req, res) => {
+    connection.query('select * from categories;', (err, data, fields) => {
+        if (err) console.log(err);
+        res.render('categories', {
+            'cats': data
+        });
+    });
+});
+
+app.get('/category/:id', (req, res) => {
+    connection.query('select * from items where cat_id=?', [[req.params.id]], (err, data, fields) => {
+        if (err) console.log(err);
+        res.render('items_with_cat', {
+            'items': data
+        });
+    });
+});
+
 app.post('/items', (req, res) => {
     let offset = req.body.offset;
     connection.query('select * from items limit 5 offset ?', [[offset]], (err, data, fields) => {
@@ -109,10 +127,14 @@ app.get('/add', isAuth, (req, res) => {
     res.render('add')
 })
 
+app.get('/add_cat', isAuth, (req, res) => {
+    res.render('add_cat');
+});
+
 app.post('/store', isAuth, (req, res) => {
     connection.query(
-        "INSERT INTO items (title, image) VALUES (?, ?)",
-        [[req.body.title], [req.body.image]],
+        "INSERT INTO items (title, image, cat_id) VALUES (?, ?, ?)",
+        [[req.body.title], [req.body.image], [req.body.cat_id]],
         (err, data, fields) => {
             if (err) {
                 console.log(err);
@@ -136,7 +158,7 @@ app.post('/delete', (req, res) => {
 
 app.post('/update', (req, res) => {
     connection.query(
-        "UPDATE items SET title=?, image=? WHERE id=?", [[req.body.title],[req.body.image],[req.body.id]], (err, data, fields) => {
+        "UPDATE items SET title=?, image=?, cat_id=? WHERE id=?", [[req.body.title],[req.body.image],[req.body.cat_id],[req.body.id]], (err, data, fields) => {
             if (err) {
                 console.log(err);
             }
@@ -159,12 +181,16 @@ app.post('/authh', (req, res) => {
                 console.log(err);
             }
             if (data.length > 0) {
-                console.log('auth');  
-                req.session.auth=true     
-            } else {
-                console.log('no auth');
-            }
+                req.session.auth=true;
+            };
             res.redirect('/');
         }
     );
-})
+});
+
+app.post('/cat_add', isAuth, (req, res) => {
+    connection.query('insert into categories (title, description) values (?, ?)', [[req.body.cat_title], [req.body.cat_desc]], (err, data, fields) => {
+        if (err) console.log(err);
+        res.redirect('/')
+    });
+});
