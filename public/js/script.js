@@ -43,7 +43,7 @@ function renderItem(item){
     div.classList.add('section');
 
     let a = document.createElement('a');
-    a.href = `/items/${item}`;
+    a.href = `/items/${item.id}`;
 
     let h2 = document.createElement('h2');
     h2.classList.add('section__titiel');
