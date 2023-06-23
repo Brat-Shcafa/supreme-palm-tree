@@ -3,7 +3,7 @@ const express = require('express')
 const mysql = require('mysql');
 const path = require('path');
 const session = require('express-session');
-const e = require('express');
+const express = require('express');
 const app = express();
 
 // Соединение с базой данных
@@ -158,7 +158,11 @@ app.post('/delete', (req, res) => {
             if (err) {
                 console.log(err);
             }
-            res.redirect('/');
+            connection.query('delete from item_category where item_id = ?', 
+                             [[req.body.id]], (err, data1, fields) => {
+                                 if (err) console.log(err);
+                                res.redirect('/');
+                             }
         }
     );
 })
@@ -169,6 +173,10 @@ app.post('/update', (req, res) => {
             if (err) {
                 console.log(err);
             }
+<<<<<<< HEAD
+=======
+            if (err) console.log(err);
+>>>>>>> a75426ba52f46aadc718679ea96a35e43e418c6c
             res.redirect('/');
         }
     );
