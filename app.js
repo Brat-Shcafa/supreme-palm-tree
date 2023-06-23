@@ -169,7 +169,11 @@ app.post('/update', (req, res) => {
             if (err) {
                 console.log(err);
             }
-            res.redirect('/');
+            connection.query('delete from item_category where item_id = ?', 
+            [[req.body.id]], (err, data1, fields) => {
+                if (err) console.log(err);
+                res.redirect('/');
+            });
         }
     );
 })
