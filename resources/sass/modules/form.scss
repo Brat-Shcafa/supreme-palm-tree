@@ -1,0 +1,22 @@
+.form-group {
+    margin-bottom: 20px;
+
+    &__label{
+        display: block;
+        margin-bottom: 3px;
+    }
+
+    &__input{
+        padding: 7px;
+    }
+}
+
+.form-button {
+    color: white;
+    padding: 7px;
+    background-color: blue;
+
+    &:hover{
+        cursor: pointer;
+    }
+}
