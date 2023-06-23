@@ -1,0 +1,16 @@
+<%- include('particles/header.ejs') %>
+<%- include('particles/navigation.ejs') %>
+<div>
+    <form action="/cat_add" method="post">
+        <div class="form-group">
+            <label class="form-group__label" for="cat_title">Название категории</label>
+            <input type="text" class="form-group__input" name="cat_title" id="cat_title" placeholder="Название категории">
+        </div>
+        <div class="form-group">
+            <label class="form-group__label" for="cat_desc">Описание категории</label>
+            <input type="text" class="form-group__input" name="cat_desc" id="cat_desc" placeholder="Описание категории">
+        </div>
+            <input class="form-button" type="submit" value="Добавиь категорию">
+    </form>
+</div>
+<%- include('particles/footer.ejs') %>
