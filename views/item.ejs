@@ -8,8 +8,10 @@
     </h2>
     <img class="section__image" src="/img/<%= item.image %>">
     <div>
-        <% for (let i=0; i<cats_for_item.length; i++) {%>
-            <%= cats_for_item[i].title %>
+        <% if (cats_for_item) {%>
+            <% for (let i=0; i<cats_for_item.length; i++) {%>
+                <%= cats_for_item[i].title %>
+            <% } %>
         <% } %>
     </div>
 </div>

@@ -2,9 +2,14 @@ require('dotenv').config()
 const express = require('express')
 const mysql = require('mysql');
 const path = require('path');
+const fs = require("fs");
 const session = require('express-session');
-const e = require('express');
 const app = express();
+const multer = require("multer");
+const { log } = require('console');
+
+// Путь к директории для загрузок
+const upload = multer({ dest: "public/img" });
 
 // Соединение с базой данных
 const connection = mysql.createConnection({
@@ -37,8 +42,8 @@ app.use(express.urlencoded({ extended: true }));
 // Инициализация сессии
 app.use(session({ secret: "Secret", resave: false, saveUninitialized: true }));
 
-// Запуск веб-сервера по адресу http://localhost:10007
-app.listen(10007);
+// Запуск веб-сервера по адресу http://localhost:200
+app.listen(200);
 
 // Middleware
 function isAuth(req, res, next) {
@@ -130,7 +135,7 @@ app.get('/item/:id', (req, res) => {
         });
 });
 
-app.get('/add', isAuth, (req, res) => {
+app.get('/add', (req, res) => {
     res.render('add')
 })
 
@@ -138,18 +143,18 @@ app.get('/add_cat', isAuth, (req, res) => {
     res.render('add_cat');
 });
 
-app.post('/store', isAuth, (req, res) => {
-    connection.query(
-        "INSERT INTO items (title, image, cat_id) VALUES (?, ?)",
-        [[req.body.title], [req.body.image]],
-        (err, data, fields) => {
-            if (err) {
-                console.log(err);
-            }
-
-            res.redirect('/');
-        }
-    );
+app.post('/store', upload.single('image'), (req, res) => {
+    const tempPath = req.file.path;
+    const targetPath = path.join(
+        "./public/img/" + req.file.originalname
+    );    
+    fs.rename(tempPath, targetPath, (err) => {
+        if (err) console.log(err);
+    });
+    connection.query('insert into items (title, image) values (?, ?)', [[req.body.title], [targetPath.slice(11)]], (err, data, fields) => {
+        if (err) console.log(err);
+        res.redirect('/');
+    });
 })
 
 app.post('/delete', (req, res) => {
