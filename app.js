@@ -45,130 +45,49 @@ function isAuth(req, res, next) {
 /**
  * Маршруты
  */
-app.get('/', (req, res) => {
-    const itemsPerPage = 5;
-    let page = parseInt(req.query.page); // localhost?page=4
-    if (!page) page = 1;
-    connection.query("select count(id) as count from items", (err, data, fields) => {
-        const count = data[0].count;
-        const pages = Math.ceil(count / itemsPerPage)
-
-        if (page > pages) {
-            page = pages;
-        };
-
-        connection.query("SELECT * FROM items LIMIT ? OFFSET ?",
-            [itemsPerPage, itemsPerPage * (page - 1)],
-            (err, data, fields) => {
-                if (err) {
-                    console.log(err);
-                }
-
-                res.render('home', {
-                    'items': data,
-                    "curPage": page,
-                    "totPage": pages,
-                });
-            }
-        );
-    });
-})
-
-app.get('/categories', (req, res) => {
-    connection.query('select * from categories;', (err, data, fields) => {
-        if (err) console.log(err);
-        res.render('categories', {
-            'cats': data
-        });
-    });
-});
-
-app.get('/category/:id', (req, res) => {
-    connection.query('select * from items where cat_id=?', [[req.params.id]], (err, data, fields) => {
-        if (err) console.log(err);
-        res.render('items_with_cat', {
-            'items': data
-        });
-    });
-});
-
-app.post('/items', (req, res) => {
-    let offset = req.body.offset;
-    connection.query('select * from items limit 5 offset ?', [[offset]], (err, data, fields) => {
-        if (err) {
-            console.log(err);
-        };
-        res.status(200).send(data);
-
+app.get('/', async (req, res) => {
+    const items = await prisma.item.findMany();
+    console.log(items);
+    res.render('home', {
+        items: items
     });
 });
 
 app.get('/item/:id', (req, res) => {
-    connection.query("SELECT * FROM items WHERE id=?", [req.params.id],
-        (err, data, fields) => {
-            if (err) console.log(err);
-            connection.query('select * from categories', (err, cats, fields) => {
-                connection.query('select * from categories where id IN (select cat_id from item_category where item_id = ?);',
-                    [[data[0].id]],
-                    (err, cats_for, fields) => {
-                        if (err) console.log(err);
-                        res.render('item', {
-                            'item': data[0],
-                            'cats_for_item': cats_for,
-                            'cats': cats
-                        });
-                    });
-            });
-        });
+    
 });
 
 app.get('/add', (req, res) => {
     res.render('add')
 })
 
-app.get('/add_cat', isAuth, (req, res) => {
-    res.render('add_cat');
-});
 
-app.post('/store', upload.single('image'), (req, res) => {
+app.post('/store', upload.single('image'), async (req, res) => {
     const tempPath = req.file.path;
     const targetPath = path.join(
         "./public/img/" + req.file.originalname
     );    
     fs.rename(tempPath, targetPath, (err) => {
         if (err) console.log(err);
+    });;
+
+    const { title, image } = req.body;
+    await prisma.item.create({
+        data: {
+            title,
+            image: req.file.originalname,
+        }
     });
-    connection.query('insert into items (title, image) values (?, ?)', [[req.body.title], [targetPath.slice(11)]], (err, data, fields) => {
-        if (err) console.log(err);
-        res.redirect('/');
-    });
+
+    res.redirect('/');
 })
 
 app.post('/delete', (req, res) => {
-    connection.query(
-        "DELETE FROM items WHERE id=?", [[req.body.id]], (err, data, fields) => {
-            if (err) {
-                console.log(err);
-            }
-            connection.query('delete from item_category where item_id = ?', 
-            [[req.body.id]], 
-            (err, data1, fields) => {
-                if (err) console.log(err);
-                res.redirect('/');
-            });
-        }
-    );
+    
 })
 
 app.post('/update', (req, res) => {
-    connection.query(
-        "UPDATE items SET title=?, image=? WHERE id=?", [[req.body.title], [req.body.image], [req.body.id]], (err, data, fields) => {
-            if (err) {
-                console.log(err);
-            }
-            res.redirect('/');
-        }
-    );
+    
 })
 
 app.get('/auth', (req, res) => {
@@ -176,42 +95,6 @@ app.get('/auth', (req, res) => {
 
 });
 
-app.post('/authh', (req, res) => {
-    connection.query(
-        "SELECT * FROM users WHERE name=? and password=?",
-        [[req.body.name], [req.body.password]],
-        (err, data, fields) => {
-            if (err) {
-                console.log(err);
-            }
-            if (data.length > 0) {
-                req.session.auth = true;
-            };
-            res.redirect('/');
-        }
-    );
-});
-
-app.post('/cat_add', isAuth, (req, res) => {
-    connection.query('insert into categories (title, description) values (?, ?)', [[req.body.cat_title], [req.body.cat_desc]], (err, data, fields) => {
-        if (err) console.log(err);
-        res.redirect('/')
-    });
-});
-
-app.post('/add_to_cat', isAuth, (req, res) => {
-    connection.query('select * from categories where title = ?', [[req.body.cats]], (err, cat_id, fields) => {
-        if (err) console.log(err);
-        connection.query('select * from item_category where item_id = ? and cat_id = ?', [[Number(req.body.id)], [cat_id[0].id]], (err, data, fields) => {
-            if (err) console.log(err);
-            if (data.length <= 0) {
-                connection.query('insert into item_category (item_id, cat_id) values (?, ?)', [[req.body.id], [cat_id[0].id]], (err, data, fields) => {
-                    if (err) console.log(err);
-                    res.redirect('/');
-                });
-            } else {
-                res.redirect('/');
-            };
-        });
-    });
+app.post('/log-in', (req, res) => {
+    
 });
