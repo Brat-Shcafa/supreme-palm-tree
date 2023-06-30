@@ -47,7 +47,7 @@ function isAuth(req, res, next) {
  */
 app.get('/', async (req, res) => {
     const items = await prisma.item.findMany();
-    console.log(items);
+    
     res.render('home', {
         items: items
     });
@@ -57,12 +57,12 @@ app.get('/item/:id', (req, res) => {
     
 });
 
-app.get('/add', (req, res) => {
+app.get('/add', isAuth, (req, res) => {
     res.render('add')
 })
 
 
-app.post('/store', upload.single('image'), async (req, res) => {
+app.post('/store', isAuth, upload.single('image'), async (req, res) => {
     const tempPath = req.file.path;
     const targetPath = path.join(
         "./public/img/" + req.file.originalname
@@ -92,9 +92,18 @@ app.post('/update', (req, res) => {
 
 app.get('/auth', (req, res) => {
     res.render('auth');
-
 });
 
-app.post('/log-in', (req, res) => {
-    
+app.post('/log-in', async (req, res) => {
+    const item = await prisma.item.findFirst({
+        where: {
+            password: req.body.password,
+        }
+    });
+    if (item) {
+        req.session.auth = true;
+        res.redirect('/');
+    } else {
+        res.redirect('/');
+    };
 });
