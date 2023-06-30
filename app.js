@@ -1,29 +1,16 @@
-require('dotenv').config()
 const express = require('express')
-const mysql = require('mysql');
 const path = require('path');
 const fs = require("fs");
 const session = require('express-session');
 const app = express();
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 const multer = require("multer");
 const { log } = require('console');
 
 // Путь к директории для загрузок
 const upload = multer({ dest: "public/img" });
 
-// Соединение с базой данных
-const connection = mysql.createConnection({
-    host: process.env.HOST,
-    database: process.env.DATABASE,
-    user: process.env.DB_USER,
-    password: process.env.PASSWORD
-});
-
-connection.connect((err) => {
-    if (err) {
-        console.log(err);
-    }
-});
 
 app.use(express.json());
 
