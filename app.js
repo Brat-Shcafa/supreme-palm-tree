@@ -42,8 +42,8 @@ app.use(express.urlencoded({ extended: true }));
 // Инициализация сессии
 app.use(session({ secret: "Secret", resave: false, saveUninitialized: true }));
 
-// Запуск веб-сервера по адресу http://localhost:200
-app.listen(200);
+// Запуск веб-сервера по адресу http://localhost:10007
+app.listen(10007);
 
 // Middleware
 function isAuth(req, res, next) {
