@@ -1,71 +1,76 @@
-# Введение в системы управления базами данных 
+# ORM
 
-СУБД — комплекс программ, позволяющих создать базу данных (БД) и манипулировать данными (вставлять, обновлять, удалять и выбирать). Система обеспечивает безопасность, надёжность хранения и целостность данных, а также предоставляет средства для администрирования БД.
+Set up a new Prisma project
 
-## СУБД MySQL
+    npx prisma init
 
-    https://www.mysql.com/
+Define Prisma schema
 
-## SQL
+    model Item {
+        id          Int       @id @default(autoincrement())
+        title       String    @db.VarChar(255)
+        image       String    @db.VarChar(255)
+        created_at  DateTime  @default(now())
+        updated_at  DateTime  @default(now())
 
-SQL (аббр. от англ. Structured Query Language — «язык структурированных запросов») — декларативный язык программирования, применяемый для создания, модификации и управления данными в реляционной базе данных, управляемой соответствующей системой управления базами данных.
+        location    Location  @relation(fields: [location_id], references: [id])
+        location_id Int
+        categories  ItemRelCategory[]
 
-Просмотр листинга баз данных
+        @@map("items")
+    }
 
-    SHOW DATABASES;
+    model Location {
+        id          Int      @id @default(autoincrement())
+        title       String   @db.VarChar(255)
+        description String   @db.VarChar(255)
+        created_at  DateTime @default(now())
+        updated_at  DateTime @default(now())
 
-Пример создания базы данных
+        items Item[]
 
-    CREATE DATABASE nature;
+        @@map("locations")
+    }
 
-Подключить базу данных
+    model Category {
+        id         Int      @id @default(autoincrement())
+        title      String   @db.VarChar(255)
+        created_at DateTime @default(now())
+        updated_at DateTime @default(now())
 
-    USE nature;
+        items      ItemRelCategory[]
 
-Просмотр листинга таблиц БД
+        @@map("categories")
+    }
 
-    SHOW TABLES;
+    model ItemRelCategory {
+        item        Item @relation(fields: [item_id], references: [id])
+        item_id     Int
+        category    Category @relation(fields: [category_id], references: [id])
+        category_id Int
 
-Пример создания таблицы в БД
+        @@id([item_id, category_id])
+        @@map("item_category")
+    }
 
-    CREATE TABLE items (id INT PRIMARY KEY AUTO_INCREMENT, title VARCHAR(255), image VARCHAR(255));
+Create migrations from Prisma schema and apply them to the database
 
-Пример изменения типа столбца в БД
+    npx prisma migrate dev 
 
-    ALTER TABLE items MODIFY COLUMN description VARCHAR(3200);
+Generate new migration and apply to the database
 
-Пример добавления столбца в БД
+    npx prisma migrate dev --name add-description
 
-    ALTER TABLE items ADD description VARCHAR(255) AFTER image;
+Delete and recreate the database
 
-Просмотр структуры таблицы БД
+    npx prisma migrate reset
 
-    DESCRIBE items;
+Status
 
-Выборка данных
+    npx prisma migrate status
 
-    SELECT * FROM nature;
+Apply pending migrations and create the database if it does not exist
 
-Пример выборки данных с условием
+    npx prisma migrate deploy
 
-    SELECT * FROM nature WHERE id=2;
-
-Пример записи данных в БД
-
-    INSERT INTO nature (title, image) VALUES ('Природа', 'nature.jpeg');
-
-Пример обновления записи в БД
-
-    UPDATE nature SET title='Природа 2' WHERE id=2;
-
-Пример удаления записи из БД
-
-    DELETE FROM nature WHERE id=2;
-
-Удаление БД
-
-    DROP DATABASE nature;
-
-Удаление таблицы в БД
-
-    DROP TABLE items;
+https://github.com/prisma/prisma-examples/blob/latest/javascript/rest-express/src/index.js
