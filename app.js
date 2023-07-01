@@ -90,7 +90,7 @@ app.post('/store', isAuth, upload.single('image'), async (req, res) => {
     res.redirect('/');
 })
 
-app.post('/delete', async (req, res) => {
+app.post('/delete', isAuth, async (req, res) => {
     const { id } = req.body;
     await prisma.item.deleteMany({
         where: {
@@ -119,10 +119,16 @@ app.get('/auth', (req, res) => {
     res.render('auth');
 });
 
+app.get('/add-category', isAuth, (req, res) => {
+    res.render('add_cat');
+});
+
 app.post('/log-in', async (req, res) => {
+    const { name, password } = req.body;
     const item = await prisma.user.findFirst({
         where: {
-            'password': req.body.password,
+            name,
+            password,
         }
     });
     if (item) {
@@ -132,3 +138,47 @@ app.post('/log-in', async (req, res) => {
         res.redirect('/');
     };
 });
+
+app.post('/sign-up', async (req, res) => {
+    const { name, password } = req.body;
+    const item = await prisma.user.findFirst({
+        where: {
+            name,
+            password,
+        }
+    });
+    if (item){
+        res.redirect('/');
+    } else {
+        await prisma.user.create({
+            data: {
+                name,
+                password,
+            }
+        });
+        req.session.auth = true;
+        res.redirect('/');
+    };
+});
+
+app.post('/create-cat', isAuth, async (req, res) => {
+    const { title, description } = req.body;
+    const item = await prisma.category.findFirst({
+        where: {
+            title,
+        }
+    });
+
+    if (item) {
+        res.redirect('/');
+    } else {
+        await prisma.category.create({
+            data: {
+                title,
+                description,
+            }
+        });
+        res.redirect('/');
+    };
+});
+
