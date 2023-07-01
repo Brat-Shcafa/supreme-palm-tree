@@ -1,0 +1,19 @@
+<%- include('particles/header.ejs') %>
+<%- include('particles/navigation.ejs') %>
+
+<% for(let i = 0; i < item.length; i++ ) { %>
+    <div class="section">
+        <a href="category/<%= item[i].id %>">
+            <h2 class="section__title"><%= item[i].title %></h2>
+            <p><%= item[i].description %></p>
+        </a>
+        <form action="/del-cat" method="post">
+            <div class="form-group">
+                <input type="submit" class="form-button" value="Удалить категорию">
+                <input type="hidden" name="cat_id" value="<%= item[i].id %>">
+            </div>
+        </form>
+    </div>
+<% } %>
+
+<%- include('particles/footer.ejs') %>

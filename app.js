@@ -182,3 +182,18 @@ app.post('/create-cat', isAuth, async (req, res) => {
     };
 });
 
+app.get('/categories', async (req, res) => {
+    const item = await prisma.category.findMany();
+    res.render('categories', {
+        item,
+    });
+});
+
+app.post("/del-cat", async (req, res) => {
+    await prisma.category.delete({
+        where: {
+            id: Number(req.body.cat_id),
+        }
+    });
+    res.redirect('/');
+});
