@@ -8,6 +8,8 @@
 
 .section__image {
     border-radius: 8px;
+    width: 300px;
+    height: auto;
 }
 
 .section__title {

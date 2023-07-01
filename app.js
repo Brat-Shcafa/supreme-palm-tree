@@ -53,8 +53,16 @@ app.get('/', async (req, res) => {
     });
 });
 
-app.get('/item/:id', (req, res) => {
-    
+app.get('/item/:id', async (req, res) => {
+    const item = await prisma.item.findFirst({
+        where: {
+            id: Number(req.params.id),
+        }
+    });
+
+    res.render('item', {
+        'item': item
+    });
 });
 
 app.get('/add', isAuth, (req, res) => {
@@ -82,12 +90,29 @@ app.post('/store', isAuth, upload.single('image'), async (req, res) => {
     res.redirect('/');
 })
 
-app.post('/delete', (req, res) => {
-    
+app.post('/delete', async (req, res) => {
+    const { id } = req.body;
+    await prisma.item.deleteMany({
+        where: {
+            id: Number(id)
+        }
+    });
+
+    res.redirect('/');
 })
 
-app.post('/update', (req, res) => {
-    
+app.post('/update', isAuth, async (req, res) => {
+    const { title, id } = req.body;
+    await prisma.item.update({
+        where: {
+            id: Number(id)
+        },
+        data: {
+            title,
+        }
+    });
+
+    res.redirect('/');
 })
 
 app.get('/auth', (req, res) => {
@@ -95,9 +120,9 @@ app.get('/auth', (req, res) => {
 });
 
 app.post('/log-in', async (req, res) => {
-    const item = await prisma.item.findFirst({
+    const item = await prisma.user.findFirst({
         where: {
-            password: req.body.password,
+            'password': req.body.password,
         }
     });
     if (item) {
