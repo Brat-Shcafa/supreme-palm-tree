@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require("fs");
 const session = require('express-session');
 const app = express();
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient, Prisma } = require('@prisma/client');
 const prisma = new PrismaClient();
 const multer = require("multer");
 const { log } = require('console');
@@ -54,14 +54,30 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/item/:id', async (req, res) => {
-    const item = await prisma.item.findFirst({
+    const item = await prisma.item.findUnique({
         where: {
             id: Number(req.params.id),
         }
     });
 
+    const categories = await prisma.category.findMany();
+
+    const cats = await prisma.itemRelCategory.findMany({
+        where: {
+            item_id: Number(req.params.id),
+        }
+    });
+    console.log(cats);
+    const in_cats = await prisma.category.findUnique({
+        where: {
+            id: cats[0] 
+        }
+    });
+
     res.render('item', {
-        'item': item
+        item,
+        categories,
+        in_cats,
     });
 });
 
@@ -92,9 +108,15 @@ app.post('/store', isAuth, upload.single('image'), async (req, res) => {
 
 app.post('/delete', isAuth, async (req, res) => {
     const { id } = req.body;
-    await prisma.item.deleteMany({
+    await prisma.item.delete({
         where: {
             id: Number(id)
+        }
+    });
+
+    await prisma.itemRelCategory.deleteMany({
+        where: {
+            id: Number(id),
         }
     });
 
@@ -189,11 +211,32 @@ app.get('/categories', async (req, res) => {
     });
 });
 
-app.post("/del-cat", async (req, res) => {
+app.post("/del-cat", isAuth, async (req, res) => {
     await prisma.category.delete({
         where: {
             id: Number(req.body.cat_id),
         }
     });
+    await prisma.itemRelCategory.deleteMany({
+        where: {
+            cat_id: Number(req.body.cat_id),
+        }
+    });
     res.redirect('/');
 });
+
+app.get('/category/:id', async (req, res) => {
+    
+});
+
+app.post('/add_to_cat', async (req, res) => {
+    const { cats, id } = req.body;
+    await prisma.itemRelCategory.create({
+        data: {
+            cat_id: Number(cats),
+            item_id: Number(id),
+        }
+    });
+    res.redirect(`/item/${id}`);
+});
+

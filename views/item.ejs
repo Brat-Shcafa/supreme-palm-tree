@@ -7,12 +7,20 @@
         <%= item.title %>
     </h2>
     <img class="section__image" src="/img/<%= item.image %>">
+
+    <div>
+        <ul>
+            <% for(let i = 0; i < in_cats.length; i++) {%>
+                <li><a href="/category/<%= in_cats[i].id %>"><%= in_cats[i].title %></a></li>
+            <% } %>
+        </ul>
+    </div>
 </div>
 
 
 <form action="/update" method="post">
     <div class="form-group">
-        <label class="form-group__label" for="title">title</label>
+        <label class="form-group__label" for="title">Название</label>
         <input value="<%= item.title %>" class="form-group__input" type="text" id="title" name="title"
             placeholder="title">
     </div>
@@ -20,6 +28,19 @@
     <input type="hidden" value="<%= item.id %>" name="id">
     <input class="form-button" type="submit" value="Обновить">
    
+</form>
+
+<form action="/add_to_cat" method="post">
+    <div class="form-group">
+        <label class="form-group__label" for="cats">Добавить в категорию</label>
+        <select name="cats" id="cats">
+            <% for(let i = 0; i < categories.length; i++) {%>
+                <option value="<%= categories[i].id %>"><%= categories[i].title %></option>
+            <% } %>
+        </select>
+    </div>
+    <input type="hidden" value="<%= item.id %>" name="id">
+    <input class="form-button" type="submit" value="Добавить в категорию">
 </form>
 
 
