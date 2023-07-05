@@ -11,28 +11,46 @@ datasource db {
 }
 
 model Item {
-        id          Int       @id @default(autoincrement())
-        title       String    @db.VarChar(255)
-        image       String    @db.VarChar(255)
+    id          Int       @id @default(autoincrement())
+    title       String    @db.VarChar(255)
+    image       String    @db.VarChar(255)
 
-        @@map("items")
-    }
+    location    Location  @relation(fields: [location_id], references: [id])
+    location_id Int
+    categories  ItemRelCategory[]
 
-model Category{
-        id Int @id @default(autoincrement())
-        title String @db.VarChar(255)
-        description String @db.VarChar(2048)
+    @@map("items")
+}
 
-        @@map("categories")    
-    }
+model Location {
+    id          Int      @id @default(autoincrement())
+    title       String   @db.VarChar(255)
+    description String   @db.VarChar(255)
+
+    items Item[]
+
+    @@map("locations")
+}
+
+model Category {
+    id         Int      @id @default(autoincrement())
+    title      String   @db.VarChar(255)
+    description String  @db.VarChar(2048)
+    
+    items      ItemRelCategory[]
+
+    @@map("categories")
+}
 
 model ItemRelCategory {
-        item_id   Int
-        cat_id Int
+    item        Item @relation(fields: [item_id], references: [id])
+    item_id     Int
+    category    Category @relation(fields: [category_id], references: [id])
+    category_id Int
 
-        @@id([item_id, cat_id])
-        @@map("item_category")
-    }
+    @@id([item_id, category_id])
+    @@map("item_category")
+}
 
 model User{
   id Int @id @default(autoincrement())
@@ -41,4 +59,3 @@ model User{
 
   @@map("users")
 }
-

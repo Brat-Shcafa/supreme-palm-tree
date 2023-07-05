@@ -1,0 +1,10 @@
+<%- include('particles/header.ejs') %>
+<%- include('particles/navigation.ejs') %>
+
+<form action="/create-loc" method="post">
+    <input  name='title' type="text" placeholder='Название'>
+    <textarea name="description" placeholder="Описание"></textarea>
+    <input class="form-button" type="submit" value="Создать локацию">
+</form>
+
+<%- include('particles/footer.ejs') %>

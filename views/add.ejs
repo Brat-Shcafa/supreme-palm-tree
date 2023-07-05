@@ -13,6 +13,15 @@
         <input type="file" name="image" id="image" class="form-button">
     </div>
 
+    <div class="form-group">
+        <label class="form-group__label" for="location">Локация</label>
+        <select name="location" id="location">
+            <% for(let i = 0; i < item.length; i++) {%>
+                <option value="<%= item[i].title %>"><%= item[i].title %></option>
+            <% } %>
+        </select>
+    </div>
+
 
     <input class="form-button" type="submit" value="Создать">
 </form>

@@ -7,6 +7,16 @@
         <%= item.title %>
     </h2>
     <img class="section__image" src="/img/<%= item.image %>">
+    <div>
+        Категории: 
+        <% for(let i = 0; i < item.categories.length; i++) {%>
+            <%= item.categories[i].category.title %>,
+        <% } %>
+    </div>
+    <div>
+        Локации: 
+        <%= item.location.title %>
+    </div>
 </div>
 
 

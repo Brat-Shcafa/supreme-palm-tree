@@ -56,7 +56,15 @@ app.get('/', async (req, res) => {
 app.get('/item/:id', async (req, res) => {
     const item = await prisma.item.findFirst({
         where: {
-            id: Number(req.params.id),
+            id: Number(req.params.id),            
+        },
+        include: {
+            location: true,
+            categories: {
+                include: {
+                    category: true,
+                }
+            },
         }
     });
 
@@ -65,8 +73,12 @@ app.get('/item/:id', async (req, res) => {
     });
 });
 
-app.get('/add', isAuth, (req, res) => {
-    res.render('add')
+app.get('/add', isAuth, async (req, res) => {
+    const item = await prisma.location.findMany();
+    
+    res.render('add', {
+        item,
+    });
 })
 
 
@@ -79,11 +91,19 @@ app.post('/store', isAuth, upload.single('image'), async (req, res) => {
         if (err) console.log(err);
     });;
 
-    const { title, image } = req.body;
+    const { title, image, location } = req.body;
+
+    const location_id = await prisma.location.findFirst({
+        where: {
+            title: location,
+        }
+    });
+
     await prisma.item.create({
         data: {
             title,
             image: req.file.originalname,
+            location_id: location_id.id,
         }
     });
 
@@ -196,4 +216,29 @@ app.post("/del-cat", async (req, res) => {
         }
     });
     res.redirect('/');
+});
+
+app.get("/add-locate", (req, res) => {
+    res.render('add_loc');
+});
+
+app.post('/create-loc', async (req, res) => {
+    const { title, description } = req.body;
+    const item = await prisma.location.findFirst({
+        where: {
+            title,
+        }
+    });
+
+    if (item) {
+        res.redirect('/');
+    } else {
+        await prisma.location.create({
+            data: {
+                title,
+                description,
+            }
+        });
+        res.redirect('/');
+    };
 });
