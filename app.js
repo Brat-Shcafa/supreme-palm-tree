@@ -7,6 +7,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const multer = require("multer");
 const { log } = require('console');
+const { prependListener } = require('process');
 
 // Путь к директории для загрузок
 const upload = multer({ dest: "public/img" });
@@ -68,8 +69,11 @@ app.get('/item/:id', async (req, res) => {
         }
     });
 
+    const cats = await prisma.category.findMany();
+
     res.render('item', {
-        'item': item
+        item,
+        cats,
     });
 });
 
@@ -112,11 +116,20 @@ app.post('/store', isAuth, upload.single('image'), async (req, res) => {
 
 app.post('/delete', isAuth, async (req, res) => {
     const { id } = req.body;
-    await prisma.item.deleteMany({
+
+    await prisma.itemRelCategory.deleteMany({
         where: {
-            id: Number(id)
+            item_id: Number(id),
         }
     });
+
+    await prisma.item.delete({
+        where: {
+            id: Number(id),
+        }
+    });
+
+    
 
     res.redirect('/');
 })
@@ -218,11 +231,11 @@ app.post("/del-cat", async (req, res) => {
     res.redirect('/');
 });
 
-app.get("/add-locate", (req, res) => {
+app.get("/add-locate", isAuth, (req, res) => {
     res.render('add_loc');
 });
 
-app.post('/create-loc', async (req, res) => {
+app.post('/create-loc', isAuth, async (req, res) => {
     const { title, description } = req.body;
     const item = await prisma.location.findFirst({
         where: {
@@ -242,3 +255,31 @@ app.post('/create-loc', async (req, res) => {
         res.redirect('/');
     };
 });
+
+app.get('/category/:id', async (req, res) => {
+    const { id } = req.params;
+
+    const category = await prisma.category.findUnique({
+        where: {
+            id: Number(id),
+        }
+    });
+
+    const items_ids = await prisma.itemRelCategory.findMany({
+        where: {
+            category_id: category.id,
+        }
+    });
+
+    const item = await prisma.item.findMany({
+        where: {
+            id: items_ids[0].item_id,
+        }
+    });
+
+
+    res.render('items_with_cat', {
+        item,
+    });
+});
+

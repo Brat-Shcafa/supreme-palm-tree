@@ -22,13 +22,28 @@
 
 <form action="/update" method="post">
     <div class="form-group">
-        <label class="form-group__label" for="title">title</label>
+        <label class="form-group__label" for="title">Название</label>
         <input value="<%= item.title %>" class="form-group__input" type="text" id="title" name="title"
-            placeholder="title">
+            placeholder="Название">
     </div>
 
     <input type="hidden" value="<%= item.id %>" name="id">
     <input class="form-button" type="submit" value="Обновить">
+   
+</form>
+
+<form action="/add-to-cat" method="post">
+    <div class="form-group">
+        <label class="form-group__label" for="cat">title</label>
+        <select name="cat" id="cat">
+            <% for(let i = 0; i < cats.length; i++) {%>
+                <option value="<%= cats[i].id %>"><%= cats[i].title %></option>
+            <% } %>
+        </select>
+    </div>
+
+    <input type="hidden" value="<%= item.id %>" name="id">
+    <input class="form-button" type="submit" value="Добавить в категорию">
    
 </form>
 
