@@ -283,3 +283,14 @@ app.get('/category/:id', async (req, res) => {
     });
 });
 
+app.post('/add-to-cat', async (req, res) => {
+   const { id, cat } = req.body;
+   await prisma.itemRelCategory.create({
+    data: {
+        item_id: Number(id),
+        category_id: Number(cat),
+    }
+   }); 
+
+   res.redirect('/')
+});
