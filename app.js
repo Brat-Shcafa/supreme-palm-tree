@@ -7,6 +7,7 @@ const { PrismaClient, Prisma } = require('@prisma/client');
 const prisma = new PrismaClient();
 const multer = require("multer");
 const { log } = require('console');
+const { prependListener } = require('process');
 
 // Путь к директории для загрузок
 const upload = multer({ dest: "public/img" });
@@ -56,33 +57,32 @@ app.get('/', async (req, res) => {
 app.get('/item/:id', async (req, res) => {
     const item = await prisma.item.findUnique({
         where: {
-            id: Number(req.params.id),
+            id: Number(req.params.id),            
+        },
+        include: {
+            location: true,
+            categories: {
+                include: {
+                    category: true,
+                }
+            },
         }
     });
 
-    const categories = await prisma.category.findMany();
-
-    const cats = await prisma.itemRelCategory.findMany({
-        where: {
-            item_id: Number(req.params.id),
-        }
-    });
-    console.log(cats);
-    const in_cats = await prisma.category.findUnique({
-        where: {
-            id: cats[0] 
-        }
-    });
+    const cats = await prisma.category.findMany();
 
     res.render('item', {
         item,
-        categories,
-        in_cats,
+        cats,
     });
 });
 
-app.get('/add', isAuth, (req, res) => {
-    res.render('add')
+app.get('/add', isAuth, async (req, res) => {
+    const item = await prisma.location.findMany();
+    
+    res.render('add', {
+        item,
+    });
 })
 
 
@@ -95,11 +95,19 @@ app.post('/store', isAuth, upload.single('image'), async (req, res) => {
         if (err) console.log(err);
     });;
 
-    const { title, image } = req.body;
+    const { title, image, location } = req.body;
+
+    const location_id = await prisma.location.findFirst({
+        where: {
+            title: location,
+        }
+    });
+
     await prisma.item.create({
         data: {
             title,
             image: req.file.originalname,
+            location_id: location_id.id,
         }
     });
 
@@ -108,17 +116,20 @@ app.post('/store', isAuth, upload.single('image'), async (req, res) => {
 
 app.post('/delete', isAuth, async (req, res) => {
     const { id } = req.body;
-    await prisma.item.delete({
+
+    await prisma.itemRelCategory.deleteMany({
         where: {
-            id: Number(id)
+            item_id: Number(id),
         }
     });
 
-    await prisma.itemRelCategory.deleteMany({
+    await prisma.item.delete({
         where: {
             id: Number(id),
         }
     });
+
+    
 
     res.redirect('/');
 })
@@ -225,18 +236,22 @@ app.post("/del-cat", isAuth, async (req, res) => {
     res.redirect('/');
 });
 
+
+
+
 app.get('/category/:id', async (req, res) => {
-    
+    const { id } = req.params;
+
 });
 
-app.post('/add_to_cat', async (req, res) => {
-    const { cats, id } = req.body;
-    await prisma.itemRelCategory.create({
-        data: {
-            cat_id: Number(cats),
-            item_id: Number(id),
-        }
-    });
-    res.redirect(`/item/${id}`);
-});
+app.post('/add-to-cat', async (req, res) => {
+   const { id, cat } = req.body;
+   await prisma.itemRelCategory.create({
+    data: {
+        item_id: Number(id),
+        category_id: Number(cat),
+    }
+   }); 
 
+   res.redirect('/')
+});
